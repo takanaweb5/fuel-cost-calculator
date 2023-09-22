@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+    <title>燃費管理</title>
+    <?!= include('css'); ?>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>燃費管理</h1>
+      <form id="fuelForm">
+        <div class="input-group">
+          <label for="date">日付</label>
+          <input type="date" id="date" name="date" required inputmode="date">
+        </div>
+        <div class="input-group">
+          <label for="distance">前回までの走行距離 (km)</label>
+          <input type="number" id="lastDistance" name="lastDistance" required inputmode="numeric" readonly value="<?= lastDistance() ?>">
+        </div>
+        <div class="input-group">
+          <label for="distance">総走行距離 (km)</label>
+          <input type="number" id="distance" name="distance" required inputmode="numeric">
+        </div>
+        <div class="input-group">
+          <label for="distance">今回走行距離 (km)</label>
+          <input type="number" id="thisDistance" name="thisDistance" required inputmode="numeric" readonly>
+        </div>
+        <div class="input-group">
+          <label for="pricePerLiter">単価 (円/L)</label>
+          <input type="number" id="pricePerLiter" name="pricePerLiter" required inputmode="numeric">
+        </div>
+        <div class="input-group">
+          <label for="fuelAmount">給油量 (L)</label>
+          <input type="decimal" id="fuelAmount" name="fuelAmount" required inputmode="decimal">
+        </div>
+        <div class="input-group">
+          <label for="totalPrice">価格 (円)</label>
+          <input type="number" id="totalPrice" name="totalPrice" required inputmode="numeric">
+        </div>
+        <div class="input-group">
+          <label>満タン給油</label>
+          <div class="radio-group">
+            <input type="radio" id="fullTank" name="fuelType" value=true checked>
+            <label for="fullTank">満タン</label>
+            <input type="radio" id="notFullTank" name="fuelType" value=false>
+            <label for="notFullTank">満タンでない</label>
+          </div>
+        </div></br>
+        <button type="submit">登録</button>
+      </form>
+      <input type="text" id="hidden" hidden value="<?= thisUrl() ?>">
+      <div id="result" class="result">
+        <!-- 燃費結果はここに表示されます -->
+      </div>
+    </div>
+    <!-- ローディングスピナー -->
+    <div id="loadingSpinner" class="loading-spinner"></div>
+    <?!= include('js'); ?>
+  </body>
+
+</html>

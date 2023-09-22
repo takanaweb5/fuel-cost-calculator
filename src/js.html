@@ -1,0 +1,84 @@
+<script>
+  function serializeFormToJson(form) {
+    const formData = new FormData(form);
+    const jsonData = {};
+
+    formData.forEach((value, key) => {
+      jsonData[key] = value.toString();
+    });
+    return jsonData;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const fuelForm = document.getElementById("fuelForm");
+    const resultDiv = document.getElementById("result");
+    const pricePerLiterInput = document.getElementById("pricePerLiter");
+    const fuelAmountInput = document.getElementById("fuelAmount");
+    const totalPriceInput = document.getElementById("totalPrice");
+    const distanceInput = document.getElementById("distance");
+    const lastDistanceInput = document.getElementById("lastDistance");
+    const thisDistanceInput = document.getElementById("thisDistance");
+
+    // ローディングスピナーの要素を取得
+    const loadingSpinner = document.getElementById("loadingSpinner");
+
+    // 画面表示時に今日の日付を日付フィールドに設定
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("date").value = today;
+
+    // 単価と給油量のロストフォーカス時
+    pricePerLiterInput.addEventListener("blur", calculateTotalPrice);
+    fuelAmountInput.addEventListener("blur", calculateTotalPrice);
+    function calculateTotalPrice() {
+      const pricePerLiter = parseFloat(pricePerLiterInput.value);
+      const fuelAmount = parseFloat(fuelAmountInput.value);
+
+      if (!isNaN(pricePerLiter) && !isNaN(fuelAmount)) {
+        const totalPrice = Math.round(pricePerLiter * fuelAmount);
+        totalPriceInput.value = totalPrice.toString();
+      }
+    }
+
+    // 総走行距離のロストフォーカス時
+    distanceInput.addEventListener("blur", calculateThisDistance);
+    function calculateThisDistance() {
+      const lastDistance = parseFloat(lastDistanceInput.value);
+      const distance = parseFloat(distanceInput.value);
+
+      if (!isNaN(distance) && !isNaN(lastDistance)) {
+        const thisDistance = Math.round(distance - lastDistance);
+        thisDistanceInput.value = thisDistance.toString();
+      }
+    }
+    // 送信ボタンがクリックされた時
+    fuelForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // ローディングスピナーを表示
+      loadingSpinner.style.display = "block";
+
+      // Google Apps Script の URL
+      var scriptUrl = document.getElementById("hidden").value;
+
+      // console.log("POSTURL:" + scriptUrl);
+      // console.log(serializeFormToJson(fuelForm));
+
+      fetch(scriptUrl, {
+        method: "POST",
+        body: JSON.stringify(serializeFormToJson(fuelForm))
+      })
+        .then(response => response.text())
+        .then(data => {
+          // 燃費データを受信して表示
+          resultDiv.innerHTML = data;
+          // ローディングスピナーを非表示にする
+          loadingSpinner.style.display = "none";
+        })
+        .catch(error => {
+          resultDiv.innerHTML = "エラーが発生しました: " + error;
+          // エラー時もローディングスピナーを非表示にする
+          loadingSpinner.style.display = "none";
+        });
+    });
+  });
+</script>
