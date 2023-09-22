@@ -37,8 +37,7 @@ function postToServer(postString: string): string {
     const postData = JSON.parse(postString);
 
     // スプレッドシートを開く
-    const sheetId =
-      PropertiesService.getScriptProperties().getProperty("SHEET_ID") ?? "";
+    const sheetId = PropertiesService.getScriptProperties().getProperty("SHEET_ID") ?? "";
     const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
     // 最終行を下にコピー
     let lastRow = sheet.getLastRow();
