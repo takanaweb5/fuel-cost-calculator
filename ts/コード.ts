@@ -1,4 +1,6 @@
 function doGet(e: GoogleAppsScript.Events.DoGet): any {
+  // Logger.log(`doGet`);
+
   // LINKで開かれたページを返す(?page=html名 のパラメータで指定させる)
   let page = e.parameter["page"];
   if (page == null) {
@@ -28,10 +30,11 @@ function lastDistance() {
   return sheet.getRange("D" + lastRow).getValue();
 }
 
-function doPost(e: GoogleAppsScript.Events.DoPost): any {
+function postToServer(postString: string): string {
+  // Logger.log(`postToServer: ${postString}`);
   try {
     // json形式で送信されたデータをobjectに変換して取得
-    const postData = JSON.parse(e.postData.contents);
+    const postData = JSON.parse(postString);
 
     // スプレッドシートを開く
     const sheetId =
@@ -53,17 +56,12 @@ function doPost(e: GoogleAppsScript.Events.DoPost): any {
     if (postData.fuelType !== "true") {
       //限定給油
       sheet.getRange("J" + lastRow).setValue(true);
-      return ContentService.createTextOutput(
-        `今回の燃費は満タンでないため計算できません`,
-      );
+      return `今回の燃費は満タンでないため計算できません`;
     } else {
-      const f = Math.round(sheet.getRange("I" + lastRow).getValue() * 100) /
-        100;
-      return ContentService.createTextOutput(`今回の燃費は ${f} km/L でした`);
+      const f = Math.round(sheet.getRange("I" + lastRow).getValue() * 100) / 100;
+      return `今回の燃費は ${f} km/L でした`;
     }
   } catch (error) {
-    return ContentService.createTextOutput(
-      "データの追加中にエラーが発生しました。",
-    );
+    return "データの追加中にエラーが発生しました。";
   }
 }

@@ -57,28 +57,26 @@
       // ローディングスピナーを表示
       loadingSpinner.style.display = "block";
 
-      // Google Apps Script の URL
-      var scriptUrl = document.getElementById("hidden").value;
+      const postString = JSON.stringify(serializeFormToJson(fuelForm));
+      // console.log(postString);
 
-      // console.log("POSTURL:" + scriptUrl);
-      // console.log(serializeFormToJson(fuelForm));
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .postToServer(postString);
 
-      fetch(scriptUrl, {
-        method: "POST",
-        body: JSON.stringify(serializeFormToJson(fuelForm))
-      })
-        .then(response => response.text())
-        .then(data => {
-          // 燃費データを受信して表示
-          resultDiv.innerHTML = data;
-          // ローディングスピナーを非表示にする
-          loadingSpinner.style.display = "none";
-        })
-        .catch(error => {
-          resultDiv.innerHTML = "エラーが発生しました: " + error;
-          // エラー時もローディングスピナーを非表示にする
-          loadingSpinner.style.display = "none";
-        });
+      function onSuccess(data) {
+        // 燃費データを受信して表示
+        resultDiv.innerHTML = data;
+        // ローディングスピナーを非表示にする
+        loadingSpinner.style.display = "none";
+      }
+
+      function onFailure(error) {
+        resultDiv.innerHTML = "エラーが発生しました: " + error;
+        // エラー時もローディングスピナーを非表示にする
+        loadingSpinner.style.display = "none";
+      }
     });
   });
 </script>
