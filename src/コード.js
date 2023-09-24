@@ -7,7 +7,8 @@ function doGet(e) {
         //pageの指定のない時はデフォルトで"index.html"を開く
         page = "index";
     }
-    return HtmlService.createTemplateFromFile(page).evaluate();
+    return HtmlService.createTemplateFromFile(page).evaluate()
+        .addMetaTag('viewport', 'initial-scale=0.4, user-scalable=no');
 }
 // CSSやjavascriptをインクルードさせる
 function include(filename) {

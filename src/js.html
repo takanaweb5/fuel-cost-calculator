@@ -9,7 +9,17 @@
     return jsonData;
   }
 
+  function resizeBody() {
+    var scale = window.innerWidth / window.screen.width;
+    document.body.style.width = 100 / scale + "%";
+    document.body.style.height = 100 / scale + "%";
+    document.body.style.transform = "scale(" + scale + ")";
+  };
+
   document.addEventListener("DOMContentLoaded", function () {
+    window.addEventListener("load", resizeBody);
+    window.addEventListener("resize", resizeBody);
+
     // 今日の日付を日付フィールドに設定
     const today = new Date().toISOString().split("T")[0];
     document.getElementById("date").value = today;
@@ -41,7 +51,7 @@
         document.getElementById("thisDistance").value = thisDistance.toString();
       }
     }
-    
+
     // 送信ボタンがクリックされた時
     const fuelForm = document.getElementById("fuelForm");
     fuelForm.addEventListener("submit", onSubmit);
