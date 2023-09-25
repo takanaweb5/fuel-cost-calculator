@@ -1,5 +1,5 @@
 function doGet(e: GoogleAppsScript.Events.DoGet): any {
-  // Logger.log(`doGet`);
+  Logger.log(`doGet`);
 
   // LINKで開かれたページを返す(?page=html名 のパラメータで指定させる)
   let page = e.parameter["page"];
@@ -32,7 +32,7 @@ function lastDistance() {
 }
 
 function postToServer(postString: string): string {
-  // Logger.log(`postToServer: ${postString}`);
+  Logger.log(`postToServer: ${postString}`);
   try {
     // json形式で送信されたデータをobjectに変換して取得
     const postData = JSON.parse(postString);

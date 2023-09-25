@@ -1,6 +1,6 @@
 "use strict";
 function doGet(e) {
-    // Logger.log(`doGet`);
+    Logger.log(`doGet`);
     // LINKで開かれたページを返す(?page=html名 のパラメータで指定させる)
     let page = e.parameter["page"];
     if (page == null) {
@@ -29,7 +29,7 @@ function lastDistance() {
 }
 function postToServer(postString) {
     var _a;
-    // Logger.log(`postToServer: ${postString}`);
+    Logger.log(`postToServer: ${postString}`);
     try {
         // json形式で送信されたデータをobjectに変換して取得
         const postData = JSON.parse(postString);
