@@ -22,19 +22,29 @@ function thisUrl() {
 function lastDistance() {
     var _a;
     // スプレッドシートを開く
-    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("SHEET_ID")) !== null && _a !== void 0 ? _a : "";
+    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("FUEL_DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
     const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
     const lastRow = sheet.getLastRow();
     return sheet.getRange("D" + lastRow).getValue();
 }
 function postToServer(postString) {
-    var _a;
     Logger.log(`postToServer: ${postString}`);
+    // json形式で送信されたデータをobjectに変換して取得
+    const postData = JSON.parse(postString);
+    switch (postData.page) {
+        case "fuel":
+            return fuelData(postData);
+        case "medicine":
+            return medicineData(postData);
+        default:
+            return "";
+    }
+}
+function fuelData(postData) {
+    var _a;
     try {
-        // json形式で送信されたデータをobjectに変換して取得
-        const postData = JSON.parse(postString);
         // スプレッドシートを開く
-        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("SHEET_ID")) !== null && _a !== void 0 ? _a : "";
+        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("FUEL_DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
         const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
         // 最終行を下にコピー
         let lastRow = sheet.getLastRow();
@@ -58,6 +68,30 @@ function postToServer(postString) {
             const f = Math.round(sheet.getRange("I" + lastRow).getValue() * 100) / 100;
             return `今回の燃費は ${f} km/L でした`;
         }
+    }
+    catch (error) {
+        return "データの追加中にエラーが発生しました。";
+    }
+}
+function medicineData(postData) {
+    var _a;
+    try {
+        // スプレッドシートを開く
+        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("MEDICINE_DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+        const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+        // 最終行を下にコピー
+        let lastRow = sheet.getLastRow();
+        const srcRange = sheet.getRange(lastRow, 1, 1, 100);
+        const dstRange = sheet.getRange(lastRow + 1, 1);
+        srcRange.copyTo(dstRange);
+        lastRow++;
+        sheet.getRange("B" + lastRow).setValue(new Date());
+        sheet.getRange("C" + lastRow).setValue(postData.date);
+        sheet.getRange("D" + lastRow).setValue(postData.medicine);
+        sheet.getRange("E" + lastRow).setValue(postData.quantity);
+        sheet.getRange("F" + lastRow).setValue(postData.symptom);
+        sheet.getRange("G" + lastRow).setValue(postData.memo);
+        return `データを１件追加しました。`;
     }
     catch (error) {
         return "データの追加中にエラーが発生しました。";
