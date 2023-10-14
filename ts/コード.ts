@@ -1,3 +1,5 @@
+let result = ""; //html内のテンプレート文字に展開させるためグローバルで宣言する
+
 function doGet(e: GoogleAppsScript.Events.DoGet): any {
   Logger.log("doGet:" + JSON.stringify(e.parameter));
 
@@ -6,6 +8,13 @@ function doGet(e: GoogleAppsScript.Events.DoGet): any {
   if (page == null) {
     //pageの指定のない時はデフォルトで"index.html"を開く
     page = "index";
+  }
+  if (page === "result") {
+    switch (e.parameter["command"]) {
+      case "remail":
+        result = makeDraftMail();
+        break;
+    }
   }
   return HtmlService.createTemplateFromFile(page).evaluate()
     .addMetaTag('viewport', 'initial-scale=0.4, user-scalable=no');
@@ -69,8 +78,8 @@ function fuelData(postData: any): string {
       sheet.getRange("J" + lastRow).setValue(true);
       return `今回の燃費は満タンでないため計算できません`;
     } else {
-      const f = Math.round(sheet.getRange("I" + lastRow).getValue() * 100) / 100;
-      return `今回の燃費は ${f} km/L でした`;
+      const f = sheet.getRange("I" + lastRow).getValue();
+      return `今回の燃費は ${f.toFixed(2)} km/L でした`;
     }
   } catch (error) {
     return "データの追加中にエラーが発生しました。";
@@ -98,4 +107,39 @@ function medicineData(postData: any): string {
   } catch (error) {
     return "データの追加中にエラーが発生しました。";
   }
+}
+
+/**
+ * 再送信ラベルのついたメールから下書きメールを作成する
+ */
+function makeDraftMail(): string {
+  // ラベルの名前（ここでは「再送信」）を指定
+  const labelName = "再送信";
+  const emailLabel: GoogleAppsScript.Gmail.GmailLabel = GmailApp.getUserLabelByName(labelName);
+  let counter: number = 0;
+  // ラベルが存在する場合
+  if (emailLabel) {
+    const threads: GoogleAppsScript.Gmail.GmailThread[] = emailLabel.getThreads();
+    for (const thread of threads) {
+      // メールスレッド（会話のやりとりを１つの塊にまとめたもの）の最古のメール
+      let message: GoogleAppsScript.Gmail.GmailMessage = thread.getMessages()[0];
+      if (createDraftFromMessage(message)) {
+        thread.removeLabel(emailLabel);
+        counter++;
+      }
+    }
+  }
+  return `${counter}件のメールを下書きに移動しました`;
+}
+
+/**
+ * 送信済みメールから下書きメールを作成
+ * @param message - 送信済みメール
+ * @return - なし
+ */
+function createDraftFromMessage(message: GoogleAppsScript.Gmail.GmailMessage): boolean {
+  const recipient = message.getTo(); // 受信者のアドレス
+  const subject = message.getSubject(); // 件名
+  const body = message.getPlainBody(); // 本文（プレーンテキスト）
+  return Boolean(GmailApp.createDraft(recipient, subject, body));
 }

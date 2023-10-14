@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
+
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-    <title>メインメニュー</title>
+    <title>レスポンス</title>
     <?!=include('css');?>
     <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
   </head>
+
   <body>
     <div class="container">
-      <div class="menu">
-        <h1>メインメニュー</h1>
-        <a href="<?=thisUrl()?>?page=fuel" target="_top" class="menu-button">燃費入力</a>
-        <a href="<?=thisUrl()?>?page=medicine" target="_top" class="menu-button">お薬手帳</a>
-        <a href="<?=thisUrl()?>?page=result&command=remail" target="_top" class="menu-button">メール再編集</a>
-      </div>
+      <?=result?>
     </div>
     <?!=include('js');?>
     <script>

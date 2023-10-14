@@ -1,4 +1,5 @@
 "use strict";
+let result = ""; //html内のテンプレート文字に展開させるためグローバルで宣言する
 function doGet(e) {
     Logger.log("doGet:" + JSON.stringify(e.parameter));
     // LINKで開かれたページを返す(?page=html名 のパラメータで指定させる)
@@ -6,6 +7,13 @@ function doGet(e) {
     if (page == null) {
         //pageの指定のない時はデフォルトで"index.html"を開く
         page = "index";
+    }
+    if (page === "result") {
+        switch (e.parameter["command"]) {
+            case "remail":
+                result = makeDraftMail();
+                break;
+        }
     }
     return HtmlService.createTemplateFromFile(page).evaluate()
         .addMetaTag('viewport', 'initial-scale=0.4, user-scalable=no');
@@ -65,8 +73,8 @@ function fuelData(postData) {
             return `今回の燃費は満タンでないため計算できません`;
         }
         else {
-            const f = Math.round(sheet.getRange("I" + lastRow).getValue() * 100) / 100;
-            return `今回の燃費は ${f} km/L でした`;
+            const f = sheet.getRange("I" + lastRow).getValue();
+            return `今回の燃費は ${f.toFixed(2)} km/L でした`;
         }
     }
     catch (error) {
@@ -96,4 +104,37 @@ function medicineData(postData) {
     catch (error) {
         return "データの追加中にエラーが発生しました。";
     }
+}
+/**
+ * 再送信ラベルのついたメールから下書きメールを作成する
+ */
+function makeDraftMail() {
+    // ラベルの名前（ここでは「再送信」）を指定
+    const labelName = "再送信";
+    const emailLabel = GmailApp.getUserLabelByName(labelName);
+    let counter = 0;
+    // ラベルが存在する場合
+    if (emailLabel) {
+        const threads = emailLabel.getThreads();
+        for (const thread of threads) {
+            // メールスレッド（会話のやりとりを１つの塊にまとめたもの）の最古のメール
+            let message = thread.getMessages()[0];
+            if (createDraftFromMessage(message)) {
+                thread.removeLabel(emailLabel);
+                counter++;
+            }
+        }
+    }
+    return `${counter}件のメールを下書きに移動しました`;
+}
+/**
+ * 送信済みメールから下書きメールを作成
+ * @param message - 送信済みメール
+ * @return - なし
+ */
+function createDraftFromMessage(message) {
+    const recipient = message.getTo(); // 受信者のアドレス
+    const subject = message.getSubject(); // 件名
+    const body = message.getPlainBody(); // 本文（プレーンテキスト）
+    return Boolean(GmailApp.createDraft(recipient, subject, body));
 }
