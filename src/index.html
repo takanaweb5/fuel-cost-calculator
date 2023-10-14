@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+    <title>メインメニュー</title>
+    <?!=include('css');?>
+    <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
+  </head>
+  <body>
+    <div class="container">
+      <div class="menu">
+        <h1>メインメニュー</h1>
+        <a href="<?=thisUrl()?>?page=fuel" target="_top" class="menu-button">燃費入力</a>
+        <a href="<?=thisUrl()?>?page=reeditmail" target="_top" class="menu-button">メール再送信</a>
+        <a href="<?=thisUrl()?>?page=medicine" target="_top" class="menu-button">薬管理</a>
+      </div>
+    </div>
+    <?!=include('js');?>
+    <script>
+      window.onload = function () {
+        window.addEventListener("resize", resizeBody);
+        resizeBody();
+      }
+    </script>
+  </body>
+</html>

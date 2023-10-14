@@ -1,4 +1,11 @@
 <script>
+  function setCommonEvent() {
+    const form = document.getElementById("form");
+    form.addEventListener("submit", onSubmit);
+    window.addEventListener("resize", resizeBody);
+    resizeBody();
+  }
+
   function serializeFormToJson(form) {
     const formData = new FormData(form);
     const jsonData = {};
@@ -16,68 +23,34 @@
     document.body.style.transform = "scale(" + scale + ")";
   };
 
-  document.addEventListener("DOMContentLoaded", function () {
-    window.addEventListener("load", resizeBody);
-    window.addEventListener("resize", resizeBody);
+  function onSubmit(e) {
+    e.preventDefault(); //デフォルトの動作をキャンセル
 
-    // 今日の日付を日付フィールドに設定
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("date").value = today;
+    const form = document.getElementById("form");
+    const resultDiv = document.getElementById("result");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    loadingSpinner.style.display = "block";
 
-    // 単価と給油量のロストフォーカス時
-    const pricePerLiterInput = document.getElementById("pricePerLiter");
-    const fuelAmountInput = document.getElementById("fuelAmount");
-    pricePerLiterInput.addEventListener("blur", calculateTotalPrice);
-    fuelAmountInput.addEventListener("blur", calculateTotalPrice);
-    function calculateTotalPrice() {
-      const pricePerLiter = parseFloat(pricePerLiterInput.value);
-      const fuelAmount = parseFloat(fuelAmountInput.value);
-      if (!isNaN(pricePerLiter) && !isNaN(fuelAmount)) {
-        const totalPrice = Math.round(pricePerLiter * fuelAmount);
-        document.getElementById("totalPrice").value = totalPrice.toString();
-      }
+    const postString = JSON.stringify(serializeFormToJson(form));
+    // console.log(postString);
+
+    google.script.run
+      .withSuccessHandler(onSuccess)
+      .withFailureHandler(onFailure)
+      .postToServer(postString);
+    function onSuccess(data) {
+      // console.log("onSuccess");
+      // console.log(data);
+      form.style.display = "none";
+      resultDiv.innerHTML = data;
+      loadingSpinner.style.display = "none";
     }
-
-    // 総走行距離のロストフォーカス時
-    const distanceInput = document.getElementById("distance");
-    const lastDistanceInput = document.getElementById("lastDistance");
-    distanceInput.addEventListener("blur", calculateThisDistance);
-    function calculateThisDistance() {
-      const lastDistance = parseFloat(lastDistanceInput.value);
-      const distance = parseFloat(distanceInput.value);
-
-      if (!isNaN(distance) && !isNaN(lastDistance)) {
-        const thisDistance = Math.round(distance - lastDistance);
-        document.getElementById("thisDistance").value = thisDistance.toString();
-      }
+    function onFailure(error) {
+      // console.log("onFailure");
+      // console.log(error);
+      form.style.display = "none";
+      resultDiv.innerHTML = "エラーが発生しました: " + error;
+      loadingSpinner.style.display = "none";
     }
-
-    // 送信ボタンがクリックされた時
-    const fuelForm = document.getElementById("fuelForm");
-    fuelForm.addEventListener("submit", onSubmit);
-    function onSubmit(e) {
-      e.preventDefault();
-
-      const resultDiv = document.getElementById("result");
-      const loadingSpinner = document.getElementById("loadingSpinner");
-      loadingSpinner.style.display = "block";
-
-      const postString = JSON.stringify(serializeFormToJson(fuelForm));
-      // console.log(postString);
-
-      google.script.run
-        .withSuccessHandler(onSuccess)
-        .withFailureHandler(onFailure)
-        .postToServer(postString);
-      function onSuccess(data) {
-        // 燃費データを受信して表示
-        resultDiv.innerHTML = data;
-        loadingSpinner.style.display = "none";
-      }
-      function onFailure(error) {
-        resultDiv.innerHTML = "エラーが発生しました: " + error;
-        loadingSpinner.style.display = "none";
-      }
-    }
-  });
+  }
 </script>

@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
     <title>燃費管理</title>
     <?!=include('css');?>
+    <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
   </head>
 
   <body>
     <div class="container">
       <h1>燃費管理</h1>
-      <form id="fuelForm">
+      <form id="form">
         <div class="input-group">
           <label for="date">日付</label>
           <input type="date" id="date" name="date" required inputmode="date">
@@ -52,7 +53,6 @@
         <button type="submit">登録</button>
       </form>
       <div id="result" class="result">
-        <!-- 燃費結果はここに表示されます -->
       </div>
     </div>
     <!-- ローディングスピナー -->
@@ -60,6 +60,43 @@
       <div id="loadingSpinner" class="loading-spinner"></div>
     </div>
     <?!=include('js');?>
-  </body>
+    <script>
+      window.onload = function () {
+        //共通のイベントを設定する
+        setCommonEvent();
 
+        // 今日の日付を日付フィールドに設定
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("date").value = today;
+
+        // 単価と給油量のロストフォーカス時
+        const pricePerLiterInput = document.getElementById("pricePerLiter");
+        const fuelAmountInput = document.getElementById("fuelAmount");
+        pricePerLiterInput.addEventListener("blur", calculateTotalPrice);
+        fuelAmountInput.addEventListener("blur", calculateTotalPrice);
+        function calculateTotalPrice() {
+          const pricePerLiter = parseFloat(pricePerLiterInput.value);
+          const fuelAmount = parseFloat(fuelAmountInput.value);
+          if (!isNaN(pricePerLiter) && !isNaN(fuelAmount)) {
+            const totalPrice = Math.round(pricePerLiter * fuelAmount);
+            document.getElementById("totalPrice").value = totalPrice.toString();
+          }
+        }
+
+        // 総走行距離のロストフォーカス時
+        const distanceInput = document.getElementById("distance");
+        const lastDistanceInput = document.getElementById("lastDistance");
+        distanceInput.addEventListener("blur", calculateThisDistance);
+        function calculateThisDistance() {
+          const lastDistance = parseFloat(lastDistanceInput.value);
+          const distance = parseFloat(distanceInput.value);
+
+          if (!isNaN(distance) && !isNaN(lastDistance)) {
+            const thisDistance = Math.round(distance - lastDistance);
+            document.getElementById("thisDistance").value = thisDistance.toString();
+          }
+        }
+      }
+    </script>
+  </body>
 </html>

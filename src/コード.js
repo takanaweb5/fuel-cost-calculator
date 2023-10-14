@@ -1,6 +1,6 @@
 "use strict";
 function doGet(e) {
-    Logger.log(`doGet`);
+    Logger.log("doGet:" + JSON.stringify(e.parameter));
     // LINKで開かれたページを返す(?page=html名 のパラメータで指定させる)
     let page = e.parameter["page"];
     if (page == null) {

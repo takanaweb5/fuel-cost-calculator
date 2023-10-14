@@ -1,5 +1,5 @@
 function doGet(e: GoogleAppsScript.Events.DoGet): any {
-  Logger.log(`doGet`);
+  Logger.log("doGet:" + JSON.stringify(e.parameter));
 
   // LINKで開かれたページを返す(?page=html名 のパラメータで指定させる)
   let page = e.parameter["page"];
@@ -8,7 +8,7 @@ function doGet(e: GoogleAppsScript.Events.DoGet): any {
     page = "index";
   }
   return HtmlService.createTemplateFromFile(page).evaluate()
-  .addMetaTag('viewport', 'initial-scale=0.4, user-scalable=no');
+    .addMetaTag('viewport', 'initial-scale=0.4, user-scalable=no');
 }
 
 // CSSやjavascriptをインクルードさせる
