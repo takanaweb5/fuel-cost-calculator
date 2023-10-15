@@ -63,9 +63,6 @@
     <?!=include('js');?>
     <script>
       window.onload = function () {
-        //共通のイベントを設定する
-        setCommonEvent();
-
         // 今日の日付を日付フィールドに設定
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("date").value = today;

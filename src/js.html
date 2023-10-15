@@ -1,10 +1,12 @@
 <script>
-  function setCommonEvent() {
-    const form = document.getElementById("form");
-    form.addEventListener("submit", onSubmit);
+  document.addEventListener("DOMContentLoaded", function () {
+    window.addEventListener("load", resizeBody);
     window.addEventListener("resize", resizeBody);
-    resizeBody();
-  }
+    const form = document.getElementById("form");
+    if (form !== null) {
+      form.addEventListener("submit", onSubmit);
+    }
+  })
 
   function serializeFormToJson(form) {
     const formData = new FormData(form);
