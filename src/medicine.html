@@ -12,7 +12,7 @@
   <body>
     <div class="container">
       <h1>お薬手帳</h1>
-      <form id="form">
+      <form id="form" name="medicine">
         <div class="input-group">
           <label for="date">日付</label>
           <input type="date" id="date" name="date" required inputmode="date">
@@ -35,8 +35,6 @@
         </div>
         </br>
         <button type="submit">登録</button>
-        <input id="hidden" name="page" hidden value="medicine">
-
       </form>
       <div id="result" class="result">
       </div>

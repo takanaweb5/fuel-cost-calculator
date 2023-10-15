@@ -39,7 +39,7 @@
     google.script.run
       .withSuccessHandler(onSuccess)
       .withFailureHandler(onFailure)
-      .postToServer(postString);
+      .postToServer(e.target.name, postString);
     function onSuccess(data) {
       // console.log("onSuccess");
       // console.log(data);

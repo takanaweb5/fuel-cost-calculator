@@ -35,11 +35,11 @@ function lastDistance() {
     const lastRow = sheet.getLastRow();
     return sheet.getRange("D" + lastRow).getValue();
 }
-function postToServer(postString) {
+function postToServer(target, postString) {
     Logger.log(`postToServer: ${postString}`);
     // json形式で送信されたデータをobjectに変換して取得
     const postData = JSON.parse(postString);
-    switch (postData.page) {
+    switch (target) {
         case "fuel":
             return fuelData(postData);
         case "medicine":
