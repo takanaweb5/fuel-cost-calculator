@@ -30,8 +30,11 @@ function thisUrl() {
 function lastDistance() {
     var _a;
     // スプレッドシートを開く
-    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("FUEL_DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
-    const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+    const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
+    if (sheet == null) {
+        return;
+    }
     const lastRow = sheet.getLastRow();
     return sheet.getRange("D" + lastRow).getValue();
 }
@@ -52,8 +55,11 @@ function fuelData(postData) {
     var _a;
     try {
         // スプレッドシートを開く
-        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("FUEL_DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
-        const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+        const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
+        if (sheet == null) {
+            return "";
+        }
         // 最終行を下にコピー
         let lastRow = sheet.getLastRow();
         const srcRange = sheet.getRange(lastRow, 1, 1, 100);
@@ -85,8 +91,11 @@ function medicineData(postData) {
     var _a;
     try {
         // スプレッドシートを開く
-        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("MEDICINE_DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
-        const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+        const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳");
+        if (sheet == null) {
+            return "";
+        }
         // 最終行を下にコピー
         let lastRow = sheet.getLastRow();
         const srcRange = sheet.getRange(lastRow, 1, 1, 100);

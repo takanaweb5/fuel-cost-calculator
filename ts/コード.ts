@@ -34,8 +34,11 @@ function thisUrl() {
 function lastDistance() {
   // スプレッドシートを開く
   const sheetId =
-    PropertiesService.getScriptProperties().getProperty("FUEL_DATA_SHEET") ?? "";
-  const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+    PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+  const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
+  if (sheet == null) {
+    return;
+  }
   const lastRow = sheet.getLastRow();
   return sheet.getRange("D" + lastRow).getValue();
 }
@@ -58,8 +61,11 @@ function postToServer(target: string, postString: string): string {
 function fuelData(postData: any): string {
   try {
     // スプレッドシートを開く
-    const sheetId = PropertiesService.getScriptProperties().getProperty("FUEL_DATA_SHEET") ?? "";
-    const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+    const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+    const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
+    if (sheet == null) {
+      return "";
+    }
     // 最終行を下にコピー
     let lastRow = sheet.getLastRow();
     const srcRange = sheet.getRange(lastRow, 1, 1, 100);
@@ -89,8 +95,11 @@ function fuelData(postData: any): string {
 function medicineData(postData: any): string {
   try {
     // スプレッドシートを開く
-    const sheetId = PropertiesService.getScriptProperties().getProperty("MEDICINE_DATA_SHEET") ?? "";
-    const sheet = SpreadsheetApp.openById(sheetId).getActiveSheet();
+    const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+    const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳");
+    if (sheet == null) {
+      return "";
+    }
     // 最終行を下にコピー
     let lastRow = sheet.getLastRow();
     const srcRange = sheet.getRange(lastRow, 1, 1, 100);
