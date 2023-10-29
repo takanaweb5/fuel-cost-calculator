@@ -179,4 +179,47 @@
       transform: rotate(360deg);
     }
   }
+
+  /* ステータスバーのスタイル */
+  .status-bar {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+  }
+
+  .record-info {
+    font-size: 18px;
+  }
+
+  .record-button {
+    width: auto;
+    display: block;
+    padding: 5px 10px;
+    background-color: var(--button-color);
+    color: var(--button-font-color);
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border: 1px solid var(--button-hover-color);
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .record-button[disabled],
+  .record-button[disabled]:hover {
+    cursor: not-allowed;
+    background-color: #ccc;
+    border-color: #bbb;
+    color: #eee;
+  }
+
+  .record-button:focus {
+    outline: none;
+    /* フォーカス時のアウトラインを非表示にする（オプション） */
+  }
 </style>

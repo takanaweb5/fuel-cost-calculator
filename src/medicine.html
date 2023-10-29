@@ -13,6 +13,7 @@
     <div class="container">
       <h1>お薬手帳</h1>
       <form id="form" name="medicine">
+        <input id="currentRecord" name="currentRecord" hidden value="0">
         <div class="input-group">
           <label for="date">日付</label>
           <input type="date" id="date" name="date" required inputmode="date">
@@ -33,23 +34,95 @@
           <label for="memo">メモ</label>
           <textarea id="memo" name="memo" rows="3"></textarea>
         </div>
-        </br>
-        <button type="submit">登録</button>
+        <p style="height: 0.6em;"></p>
+        <button type="submit" id="post" name="post">登録</button>
+        <p style="height: 0.6em;"></p>
       </form>
       <div id="result" class="result">
       </div>
+      <div class="status-bar" id="status-bar">
+        <button class="record-button" id="prev-record">◁</button>
+        <span class="record-info" id="record-info">
+          <?=recordCount("お薬手帳")?>
+        </span>
+        <button class="record-button" id="next-record">▷</button>
+      </div>
+      <div id="result" class="result"></div>
     </div>
+
     <!-- ローディングスピナー -->
     <div class="spinner-container">
       <div id="loadingSpinner" class="loading-spinner"></div>
     </div>
-    <?!=include('js');?>
     <script>
+      const prevRecordButton = document.getElementById('prev-record');
+      const nextRecordButton = document.getElementById('next-record');
+      const recordInfo = document.getElementById('record-info')
+      const resultDiv = document.getElementById("result");
+      const loadingSpinner = document.getElementById("loadingSpinner");
+      const statusBar = document.getElementById("status-bar");
+
+      prevRecordButton.addEventListener('click', onRecordButtonClick);
+      nextRecordButton.addEventListener('click', onRecordButtonClick);
+
+      // 現在のレコードと総レコード数を仮定
+      let currentRecord = recordInfo.textContent;
+      let totalRecords = recordInfo.textContent;
+      prevRecordButton.disabled = (currentRecord == 1);
+      nextRecordButton.disabled = (currentRecord == totalRecords);
+
+      function onRecordButtonClick(event) {
+        if (event.target === prevRecordButton) {
+          currentRecord--;
+        } if (event.target === nextRecordButton) {
+          currentRecord++;
+        }
+
+        document.getElementById('record-info').textContent = `${currentRecord}/${totalRecords}`;
+        prevRecordButton.disabled = true;
+        nextRecordButton.disabled = true;
+        document.getElementById("currentRecord").value = currentRecord;
+        loadingSpinner.style.display = "block";
+
+        updateRecordInfo();
+
+        // レコード情報を更新する関数
+        function updateRecordInfo() {
+          google.script.run
+            .withSuccessHandler(onSuccess)
+            .withFailureHandler(onFailure)
+            .getRecord(currentRecord, "お薬手帳");
+          function onSuccess(data) {
+            console.log("onSuccess");
+            console.log(data);
+            loadingSpinner.style.display = "none";
+
+            const inputArray = ["currentRecord", "date", "medicine", "quantity", "symptom", "memo"];
+            const receiveArray = ["連番", "日付", "薬", "数量", "症状", "メモ"];
+            const jsonData = JSON.parse(data);
+            for (let i = 0; i < inputArray.length; i++) {
+              document.getElementById(inputArray[i]).value = jsonData[receiveArray[i]];
+            }
+            prevRecordButton.disabled = (currentRecord == 1);
+            nextRecordButton.disabled = (currentRecord == totalRecords);
+            document.getElementById("post").innerText = "更新";
+          }
+          function onFailure(error) {
+            console.log("onFailure");
+            console.log(error);
+            form.style.display = "none";
+            resultDiv.innerHTML = "エラーが発生しました: " + error;
+            loadingSpinner.style.display = "none";
+            statusBar.style.display = "none";
+          }
+        }
+      }
       window.onload = function () {
         // 今日の日付を日付フィールドに設定
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("date").value = today;
       }
     </script>
+    <?!=include('js');?>
   </body>
 </html>

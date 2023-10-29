@@ -26,15 +26,20 @@ function include(filename) {
 function thisUrl() {
     return ScriptApp.getService().getUrl();
 }
+// データベースのレコード数を取得する
+function recordCount(SheetName) {
+    var _a;
+    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+    const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(SheetName);
+    const lastRow = sheet.getLastRow();
+    return sheet.getRange("A" + lastRow).getValue();
+}
 // 前回の総走行距離を返す
 function lastDistance() {
     var _a;
     // スプレッドシートを開く
     const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
-    if (sheet == null) {
-        return;
-    }
     const lastRow = sheet.getLastRow();
     return sheet.getRange("D" + lastRow).getValue();
 }
@@ -51,15 +56,41 @@ function postToServer(target, postString) {
             return "";
     }
 }
+//　レコード番号,シート名を引数にしてレコード情報をjsonで返す
+function getRecord(recordNumber, sheetName) {
+    var _a;
+    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+    const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName);
+    const data = sheet.getDataRange().getValues();
+    // 列の見出しを取得
+    const headerRow = data[0];
+    const recordData = [];
+    for (let i = 1; i < data.length; i++) {
+        // 連番が一致する行を見つけた場合
+        if (data[i][0] === recordNumber) {
+            for (let j = 0; j < headerRow.length; j++) {
+                if (headerRow[j] === "")
+                    break;
+                recordData.push(data[i][j]);
+            }
+            break;
+        }
+    }
+    if (recordData.length === 0)
+        throw new Error("データ取得エラー");
+    const result = {};
+    for (let j = 0; j < recordData.length; j++) {
+        result[headerRow[j]] = recordData[j];
+    }
+    // 結果をJSON形式で返す
+    return JSON.stringify(result);
+}
 function fuelData(postData) {
     var _a;
     try {
         // スプレッドシートを開く
         const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
         const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
-        if (sheet == null) {
-            return "";
-        }
         // 最終行を下にコピー
         let lastRow = sheet.getLastRow();
         const srcRange = sheet.getRange(lastRow, 1, 1, 100);
@@ -93,9 +124,6 @@ function medicineData(postData) {
         // スプレッドシートを開く
         const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
         const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳");
-        if (sheet == null) {
-            return "";
-        }
         // 最終行を下にコピー
         let lastRow = sheet.getLastRow();
         const srcRange = sheet.getRange(lastRow, 1, 1, 100);
