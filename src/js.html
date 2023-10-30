@@ -64,13 +64,13 @@
         .getRecords(currentRecord, sheetName);
     });
     function onSuccess(data, resolve, reject) {
-      console.log("onSuccess");
-      console.log(data);
+      // console.log("onSuccess");
+      // console.log(data);
       resolve(JSON.parse(data));
     }
     function onFailure(error, reject) {
-      console.log("onFailure");
-      console.log(error);
+      // console.log("onFailure");
+      // console.log(error);
       reject(new Error("データ取得エラー"));
     }
   }
