@@ -64,34 +64,11 @@ function postToServer(target: string, postString: string): string {
 }
 
 //　レコード番号,シート名を引数にしてレコード情報をjsonで返す
-function getRecord(recordNumber: number, sheetName: string): string {
+function getRecords(recordNumber: number, sheetName: string): string {
   const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
   const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName) as GoogleAppsScript.Spreadsheet.Sheet;
   const data = sheet.getDataRange().getValues();
-
-  // 列の見出しを取得
-  const headerRow: ReadonlyArray<string> = data[0];
-  const recordData: any[] = [];
-  for (let i = 1; i < data.length; i++) {
-    // 連番が一致する行を見つけた場合
-    if (data[i][0] === recordNumber) {
-      for (let j = 0; j < headerRow.length; j++) {
-        if (headerRow[j] === "") break;
-        recordData.push(data[i][j]);
-      }
-      break;
-    }
-  }
-
-  if (recordData.length === 0) throw new Error("データ取得エラー");
-
-  const result: Record<string, any> = {};
-  for (let j = 0; j < recordData.length; j++) {
-    result[headerRow[j]] = recordData[j];
-  }
-
-  // 結果をJSON形式で返す
-  return JSON.stringify(result);
+  return JSON.stringify(data);
 }
 
 function fuelData(postData: any): string {

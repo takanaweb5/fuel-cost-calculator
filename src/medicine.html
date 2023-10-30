@@ -13,7 +13,7 @@
     <div class="container">
       <h1>お薬手帳</h1>
       <form id="form" name="medicine">
-        <input id="currentRecord" name="currentRecord" hidden value="0">
+        <input id="recordNumber" name="recordNumber" hidden value="0">
         <div class="input-group">
           <label for="date">日付</label>
           <input type="date" id="date" name="date" required inputmode="date">
@@ -42,9 +42,9 @@
       </div>
       <div class="status-bar" id="status-bar">
         <button class="record-button" id="prev-record">◁</button>
-        <span class="record-info" id="record-info">
+        <p class="record-info" id="record-info">
           <?=recordCount("お薬手帳")?>
-        </span>
+        </p>
         <button class="record-button" id="next-record">▷</button>
       </div>
       <div id="result" class="result"></div>
@@ -61,62 +61,68 @@
       const resultDiv = document.getElementById("result");
       const loadingSpinner = document.getElementById("loadingSpinner");
       const statusBar = document.getElementById("status-bar");
-
+      const recordNumber = document.getElementById('recordNumber')
       prevRecordButton.addEventListener('click', onRecordButtonClick);
       nextRecordButton.addEventListener('click', onRecordButtonClick);
 
       // 現在のレコードと総レコード数を仮定
-      let currentRecord = recordInfo.textContent;
-      let totalRecords = recordInfo.textContent;
-      prevRecordButton.disabled = (currentRecord == 1);
-      nextRecordButton.disabled = (currentRecord == totalRecords);
+      let currentRecord = <?= recordCount("お薬手帳") ?>;
+      let totalRecords = <?= recordCount("お薬手帳") ?>;
+      prevRecordButton.disabled = (currentRecord === 1);
+      nextRecordButton.disabled = (currentRecord === totalRecords);
+      let records = [];
 
-      function onRecordButtonClick(event) {
+      async function onRecordButtonClick(event) {
         if (event.target === prevRecordButton) {
           currentRecord--;
         } if (event.target === nextRecordButton) {
           currentRecord++;
         }
-
-        document.getElementById('record-info').textContent = `${currentRecord}/${totalRecords}`;
         prevRecordButton.disabled = true;
         nextRecordButton.disabled = true;
-        document.getElementById("currentRecord").value = currentRecord;
         loadingSpinner.style.display = "block";
 
-        updateRecordInfo();
-
-        // レコード情報を更新する関数
-        function updateRecordInfo() {
-          google.script.run
-            .withSuccessHandler(onSuccess)
-            .withFailureHandler(onFailure)
-            .getRecord(currentRecord, "お薬手帳");
-          function onSuccess(data) {
-            console.log("onSuccess");
-            console.log(data);
-            loadingSpinner.style.display = "none";
-
-            const inputArray = ["currentRecord", "date", "medicine", "quantity", "symptom", "memo"];
-            const receiveArray = ["連番", "日付", "薬", "数量", "症状", "メモ"];
-            const jsonData = JSON.parse(data);
-            for (let i = 0; i < inputArray.length; i++) {
-              document.getElementById(inputArray[i]).value = jsonData[receiveArray[i]];
-            }
-            prevRecordButton.disabled = (currentRecord == 1);
-            nextRecordButton.disabled = (currentRecord == totalRecords);
-            document.getElementById("post").innerText = "更新";
+        try {
+          if (records.length === 0) {
+            records = await getRecords("お薬手帳");
           }
-          function onFailure(error) {
-            console.log("onFailure");
-            console.log(error);
-            form.style.display = "none";
-            resultDiv.innerHTML = "エラーが発生しました: " + error;
-            loadingSpinner.style.display = "none";
-            statusBar.style.display = "none";
+          updateRecordInfo();
+          document.getElementById("post").innerText = "更新";
+        } finally {
+          loadingSpinner.style.display = "none";
+          currentRecord = recordNumber.value;
+          prevRecordButton.disabled = (currentRecord <= 1);
+          nextRecordButton.disabled = (currentRecord === totalRecords);
+          recordInfo.textContent = `${currentRecord}/${totalRecords}`;
+        }
+
+        function updateRecordInfo() {
+          // 列の見出しを取得
+          const headerRow = records[0];
+          const recordData = [];
+          for (let i = 1; i < records.length; i++) {
+            // 連番が一致する行を見つけた場合
+            if (records[i][0] === currentRecord) {
+              for (let j = 0; j < headerRow.length; j++) {
+                if (headerRow[j] === "") break;
+                recordData.push(records[i][j]);
+              }
+              break;
+            }
+          }
+          if (recordData.length === 0) throw new Error("データ取得エラー");
+          const record = {};
+          for (let j = 0; j < recordData.length; j++) {
+            record[headerRow[j]] = recordData[j];
+          }
+          const inputArray = ["recordNumber", "date", "medicine", "quantity", "symptom", "memo"];
+          const receiveArray = ["連番", "日付", "薬", "数量", "症状", "メモ"];
+          for (let i = 0; i < inputArray.length; i++) {
+            document.getElementById(inputArray[i]).value = record[receiveArray[i]];
           }
         }
       }
+
       window.onload = function () {
         // 今日の日付を日付フィールドに設定
         const today = new Date().toISOString().split("T")[0];
