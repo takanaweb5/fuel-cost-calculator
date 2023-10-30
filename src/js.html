@@ -56,24 +56,6 @@
     }
   }
 
-  // サーバーからデータを取得する
-  // function getRecords() {
-  //   google.script.run
-  //     .withSuccessHandler(onSuccess)
-  //     .withFailureHandler(onFailure)
-  //     .getRecords(currentRecord, "お薬手帳");
-  //   function onSuccess(data) {
-  //     console.log("onSuccess");
-  //     console.log(data);
-  //     return JSON.parse(data);
-  //   }
-  //   function onFailure(error) {
-  //     console.log("onFailure");
-  //     console.log(error);
-  //     throw new Error("データ取得エラー");
-  //   }
-  // }
-
   function getRecords(sheetName) {
     return new Promise((resolve, reject) => {
       google.script.run

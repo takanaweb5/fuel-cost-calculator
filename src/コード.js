@@ -98,24 +98,45 @@ function fuelData(postData) {
     }
 }
 function medicineData(postData) {
-    var _a;
+    var _a, _b;
     try {
         // スプレッドシートを開く
         const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
         const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳");
-        // 最終行を下にコピー
-        let lastRow = sheet.getLastRow();
-        const srcRange = sheet.getRange(lastRow, 1, 1, 100);
-        const dstRange = sheet.getRange(lastRow + 1, 1);
-        srcRange.copyTo(dstRange);
-        lastRow++;
-        sheet.getRange("B" + lastRow).setValue(new Date());
-        sheet.getRange("C" + lastRow).setValue(postData.date);
-        sheet.getRange("D" + lastRow).setValue(postData.medicine);
-        sheet.getRange("E" + lastRow).setValue(postData.quantity);
-        sheet.getRange("F" + lastRow).setValue(postData.symptom);
-        sheet.getRange("G" + lastRow).setValue(postData.memo);
-        return `データを１件追加しました。`;
+        let updateRow = 0;
+        const recordNumber = (_b = postData.recordNumber) !== null && _b !== void 0 ? _b : 0;
+        if (recordNumber == 0) {
+            // 最終行を下にコピー
+            let lastRow = sheet.getLastRow();
+            const srcRange = sheet.getRange(lastRow, 1, 1, 100);
+            const dstRange = sheet.getRange(lastRow + 1, 1);
+            srcRange.copyTo(dstRange);
+            updateRow = lastRow + 1;
+        }
+        else {
+            const data = sheet.getRange("A2:A999").getValues(); // A列のすべての値を取得
+            for (let i = 0; i < data.length; i++) {
+                if (data[i][0] == recordNumber) {
+                    updateRow = i + 2;
+                    break;
+                }
+            }
+            if (updateRow == 0) {
+                return "データの更新に失敗しました";
+            }
+        }
+        sheet.getRange("B" + updateRow).setValue(new Date());
+        sheet.getRange("C" + updateRow).setValue(postData.date);
+        sheet.getRange("D" + updateRow).setValue(postData.medicine);
+        sheet.getRange("E" + updateRow).setValue(postData.quantity);
+        sheet.getRange("F" + updateRow).setValue(postData.symptom);
+        sheet.getRange("G" + updateRow).setValue(postData.memo);
+        if (recordNumber == 0) {
+            return `データを１件追加しました。`;
+        }
+        else {
+            return `データを１件更新しました。`;
+        }
     }
     catch (error) {
         return "データの追加中にエラーが発生しました。";

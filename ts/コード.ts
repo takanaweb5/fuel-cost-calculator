@@ -108,20 +108,39 @@ function medicineData(postData: any): string {
     // スプレッドシートを開く
     const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳") as GoogleAppsScript.Spreadsheet.Sheet;
+    let updateRow = 0;
+    const recordNumber: number = postData.recordNumber ?? 0;
 
-    // 最終行を下にコピー
-    let lastRow = sheet.getLastRow();
-    const srcRange = sheet.getRange(lastRow, 1, 1, 100);
-    const dstRange = sheet.getRange(lastRow + 1, 1);
-    srcRange.copyTo(dstRange);
-    lastRow++;
-    sheet.getRange("B" + lastRow).setValue(new Date());
-    sheet.getRange("C" + lastRow).setValue(postData.date);
-    sheet.getRange("D" + lastRow).setValue(postData.medicine);
-    sheet.getRange("E" + lastRow).setValue(postData.quantity);
-    sheet.getRange("F" + lastRow).setValue(postData.symptom);
-    sheet.getRange("G" + lastRow).setValue(postData.memo);
-    return `データを１件追加しました。`;
+    if (recordNumber == 0) {
+      // 最終行を下にコピー
+      let lastRow = sheet.getLastRow();
+      const srcRange = sheet.getRange(lastRow, 1, 1, 100);
+      const dstRange = sheet.getRange(lastRow + 1, 1);
+      srcRange.copyTo(dstRange);
+      updateRow = lastRow + 1;
+    } else {
+      const data = sheet.getRange("A2:A999").getValues(); // A列のすべての値を取得
+      for (let i = 0; i < data.length; i++) {
+        if (data[i][0] == recordNumber) {
+          updateRow = i + 2;
+          break;
+        }
+      }
+      if (updateRow == 0) {
+        return "データの更新に失敗しました";
+      }
+    }
+    sheet.getRange("B" + updateRow).setValue(new Date());
+    sheet.getRange("C" + updateRow).setValue(postData.date);
+    sheet.getRange("D" + updateRow).setValue(postData.medicine);
+    sheet.getRange("E" + updateRow).setValue(postData.quantity);
+    sheet.getRange("F" + updateRow).setValue(postData.symptom);
+    sheet.getRange("G" + updateRow).setValue(postData.memo);
+    if (recordNumber == 0) {
+      return `データを１件追加しました。`;
+    } else {
+      return `データを１件更新しました。`;
+    }
   } catch (error) {
     return "データの追加中にエラーが発生しました。";
   }
