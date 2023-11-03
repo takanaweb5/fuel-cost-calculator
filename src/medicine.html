@@ -43,7 +43,7 @@
       <div class="status-bar" id="status-bar">
         <button class="record-button" id="prev-record">◁</button>
         <p class="record-info" id="record-info">
-          <?=recordCount("お薬手帳")?>
+          ---
         </p>
         <button class="record-button" id="next-record">▷</button>
       </div>
@@ -66,10 +66,10 @@
       nextRecordButton.addEventListener('click', onRecordButtonClick);
 
       // 現在のレコードと総レコード数を仮定
-      let currentRecord = <?= recordCount("お薬手帳") ?>;
-      let totalRecords = <?= recordCount("お薬手帳") ?>;
-      prevRecordButton.disabled = (currentRecord === 1);
-      nextRecordButton.disabled = (currentRecord === totalRecords);
+      let currentRecord = Number(<?= recordCount("お薬手帳") ?>) + 1;
+      let totalRecords = Number(<?= recordCount("お薬手帳") ?>);
+      prevRecordButton.disabled = false;
+      nextRecordButton.disabled = true;
       let records = [];
 
       async function onRecordButtonClick(event) {
@@ -86,40 +86,16 @@
           if (records.length === 0) {
             records = await getRecords("お薬手帳");
           }
-          updateRecordInfo();
+          updateRecordInfo(records, currentRecord,
+            ["recordNumber", "date", "medicine", "quantity", "symptom", "memo"],
+            ["連番", "日付", "薬", "数量", "症状", "メモ"]);
           document.getElementById("post").innerText = "更新";
         } finally {
           loadingSpinner.style.display = "none";
           currentRecord = recordNumber.value;
           prevRecordButton.disabled = (currentRecord <= 1);
-          nextRecordButton.disabled = (currentRecord === totalRecords);
+          nextRecordButton.disabled = (currentRecord >= totalRecords);
           recordInfo.textContent = `${currentRecord}/${totalRecords}`;
-        }
-
-        function updateRecordInfo() {
-          // 列の見出しを取得
-          const headerRow = records[0];
-          const recordData = [];
-          for (let i = 1; i < records.length; i++) {
-            // 連番が一致する行を見つけた場合
-            if (records[i][0] === currentRecord) {
-              for (let j = 0; j < headerRow.length; j++) {
-                if (headerRow[j] === "") break;
-                recordData.push(records[i][j]);
-              }
-              break;
-            }
-          }
-          if (recordData.length === 0) throw new Error("データ取得エラー");
-          const record = {};
-          for (let j = 0; j < recordData.length; j++) {
-            record[headerRow[j]] = recordData[j];
-          }
-          const inputArray = ["recordNumber", "date", "medicine", "quantity", "symptom", "memo"];
-          const receiveArray = ["連番", "日付", "薬", "数量", "症状", "メモ"];
-          for (let i = 0; i < inputArray.length; i++) {
-            document.getElementById(inputArray[i]).value = record[receiveArray[i]];
-          }
         }
       }
 

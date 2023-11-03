@@ -64,7 +64,7 @@ function postToServer(target: string, postString: string): string {
 }
 
 //　レコード番号,シート名を引数にしてレコード情報をjsonで返す
-function getRecords(recordNumber: number, sheetName: string): string {
+function getRecords(sheetName: string): string {
   const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
   const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName) as GoogleAppsScript.Spreadsheet.Sheet;
   const data = sheet.getDataRange().getValues();

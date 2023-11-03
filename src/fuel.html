@@ -60,7 +60,7 @@
       <div class="status-bar" id="status-bar">
         <button class="record-button" id="prev-record">◁</button>
         <p class="record-info" id="record-info">
-          <?=recordCount("燃費管理")?>
+          ---
         </p>
         <button class="record-button" id="next-record">▷</button>
       </div>
@@ -87,10 +87,10 @@
       nextRecordButton.addEventListener('click', onRecordButtonClick);
 
       // 現在のレコードと総レコード数を仮定
-      let currentRecord = <?= recordCount("燃費管理") ?>;
-      let totalRecords = <?= recordCount("燃費管理") ?>;
-      prevRecordButton.disabled = (currentRecord === 1);
-      nextRecordButton.disabled = (currentRecord === totalRecords);
+      let currentRecord = Number(<?= recordCount("燃費管理") ?>) + 1;
+      let totalRecords = Number(<?= recordCount("燃費管理") ?>);
+      prevRecordButton.disabled = false;
+      nextRecordButton.disabled = true;
       let records = [];
 
       async function onRecordButtonClick(event) {
@@ -102,53 +102,31 @@
         prevRecordButton.disabled = true;
         nextRecordButton.disabled = true;
         loadingSpinner.style.display = "block";
-        //送信ボタンを押せなくする
-        document.getElementById("post").disabled = true;
+
         try {
           if (records.length === 0) {
             records = await getRecords("燃費管理");
           }
-          updateRecordInfo();
-        } finally {
-          loadingSpinner.style.display = "none";
-          currentRecord = recordNumber.value;
-          prevRecordButton.disabled = (currentRecord <= 1);
-          nextRecordButton.disabled = (currentRecord === totalRecords);
-          recordInfo.textContent = `${currentRecord}/${totalRecords}`;
-        }
+          const record = updateRecordInfo(records, currentRecord,
+            ["recordNumber", "date", "distance", "thisDistance", "pricePerLiter", "fuelAmount", "totalPrice"],
+            ["連番", "日付", "総走行距離", "今回走行距離", "単価", "給油量", "支払価格"]);
 
-        function updateRecordInfo() {
-          // 列の見出しを取得
-          const headerRow = records[0];
-          const recordData = [];
-          for (let i = 1; i < records.length; i++) {
-            // 連番が一致する行を見つけた場合
-            if (records[i][0] === currentRecord) {
-              for (let j = 0; j < headerRow.length; j++) {
-                if (headerRow[j] === "") break;
-                recordData.push(records[i][j]);
-              }
-              break;
-            }
-          }
-          if (recordData.length === 0) throw new Error("データ取得エラー");
-          const record = {};
-          for (let j = 0; j < recordData.length; j++) {
-            record[headerRow[j]] = recordData[j];
-          }
-          const inputArray = ["recordNumber", "date", "distance", "thisDistance", "pricePerLiter", "fuelAmount", "totalPrice"];
-          const receiveArray = ["連番", "日付", "総走行距離", "今回走行距離", "単価", "給油量", "支払価格"];
-          for (let i = 0; i < inputArray.length; i++) {
-            document.getElementById(inputArray[i]).value = record[receiveArray[i]];
-          }
+          //送信ボタンを押せなくする
+          document.getElementById("post").disabled = true;
           document.getElementById("lastDistanceLabel").textContent = "今回燃費";
           const f = record["今回燃費"];
           document.getElementById("lastDistance").value = f.toFixed(2);
           if (record["限定給油"] == true) {
             document.getElementById("notFullTank").checked = true;
-          }else{
+          } else {
             document.getElementById("fullTank").checked = true;
           }
+        } finally {
+          loadingSpinner.style.display = "none";
+          currentRecord = recordNumber.value;
+          prevRecordButton.disabled = (currentRecord <= 1);
+          nextRecordButton.disabled = (currentRecord >= totalRecords);
+          recordInfo.textContent = `${currentRecord}/${totalRecords}`;
         }
       }
 

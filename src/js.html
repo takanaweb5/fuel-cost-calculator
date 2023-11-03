@@ -54,24 +54,54 @@
       resultDiv.innerHTML = "エラーが発生しました: " + error;
       loadingSpinner.style.display = "none";
     }
+
+    //statusBarがあれば非表示にする
+    const statusBar = document.getElementById("status-bar");
+    if (statusBar !== null) {
+      statusBar.style.display = "none";
+    }
   }
 
   function getRecords(sheetName) {
     return new Promise((resolve, reject) => {
       google.script.run
-        .withSuccessHandler(data => onSuccess(data, resolve, reject))
-        .withFailureHandler(error => onFailure(error, reject))
-        .getRecords(currentRecord, sheetName);
+        .withSuccessHandler(data => resolve(JSON.parse(data)))
+        .withFailureHandler(error => { throw error })
+        .getRecords(sheetName);
     });
-    function onSuccess(data, resolve, reject) {
-      // console.log("onSuccess");
-      // console.log(data);
-      resolve(JSON.parse(data));
+  }
+
+  function updateRecordInfo(records, currentRecord, inputArray, receiveArray) {
+    // 列の見出しを取得
+    const headerRow = records[0];
+    const recordData = [];
+    for (let i = 1; i < records.length; i++) {
+      console.log(i + ":" + records[i][0]);
+      // 連番が一致する行を見つけた場合
+      if (records[i][0] === currentRecord) {
+        for (let j = 0; j < headerRow.length; j++) {
+          if (headerRow[j] === "") break;
+          recordData.push(records[i][j]);
+        }
+        break;
+      }
     }
-    function onFailure(error, reject) {
-      // console.log("onFailure");
-      // console.log(error);
-      reject(new Error("データ取得エラー"));
+    if (recordData.length === 0) throw new Error("データ取得エラー");
+    const record = {};
+    for (let j = 0; j < recordData.length; j++) {
+      record[headerRow[j]] = recordData[j];
     }
+    for (let i = 0; i < inputArray.length; i++) {
+      const inputElement = document.getElementById(inputArray[i]);
+      if (inputElement.type === 'date') {
+        const data = record[receiveArray[i]];
+        console.log(data);
+        console.log(inputElement.name);
+        inputElement.value = data.split("T")[0];
+      } else {
+        inputElement.value = record[receiveArray[i]];
+      }
+    }
+    return record;
   }
 </script>
