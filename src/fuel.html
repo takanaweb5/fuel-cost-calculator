@@ -121,6 +121,10 @@
           } else {
             document.getElementById("fullTank").checked = true;
           }
+        } catch (error) {
+          form.style.display = "none";
+          statusBar.style.display = "none";
+          resultDiv.innerHTML = "エラーが発生しました: " + error;
         } finally {
           loadingSpinner.style.display = "none";
           currentRecord = recordNumber.value;

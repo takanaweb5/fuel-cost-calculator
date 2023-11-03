@@ -90,6 +90,10 @@
             ["recordNumber", "date", "medicine", "quantity", "symptom", "memo"],
             ["連番", "日付", "薬", "数量", "症状", "メモ"]);
           document.getElementById("post").innerText = "更新";
+        } catch (error) {
+          form.style.display = "none";
+          statusBar.style.display = "none";
+          resultDiv.innerHTML = "エラーが発生しました: " + error;
         } finally {
           loadingSpinner.style.display = "none";
           currentRecord = recordNumber.value;
