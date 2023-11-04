@@ -25,7 +25,7 @@
     document.body.style.transform = "scale(" + scale + ")";
   };
 
-  function onSubmit(e) {
+  async function onSubmit(e) {
     e.preventDefault(); //デフォルトの動作をキャンセル
 
     const form = document.getElementById("form");
@@ -36,30 +36,30 @@
     const postString = JSON.stringify(serializeFormToJson(form));
     // console.log(postString);
 
-    google.script.run
-      .withSuccessHandler(onSuccess)
-      .withFailureHandler(onFailure)
-      .postToServer(e.target.name, postString);
-    function onSuccess(data) {
-      // console.log("onSuccess");
-      // console.log(data);
-      form.style.display = "none";
+    try {
+      const data = await postData(e.target.name, postString);
       resultDiv.innerHTML = data;
-      loadingSpinner.style.display = "none";
-    }
-    function onFailure(error) {
-      // console.log("onFailure");
-      // console.log(error);
-      form.style.display = "none";
+    } catch (error) {
       resultDiv.innerHTML = "エラーが発生しました: " + error;
-      loadingSpinner.style.display = "none";
     }
+
+    form.style.display = "none";
+    loadingSpinner.style.display = "none";
 
     //statusBarがあれば非表示にする
     const statusBar = document.getElementById("status-bar");
     if (statusBar !== null) {
       statusBar.style.display = "none";
     }
+  }
+
+  function postData(targetName, postString) {
+    return new Promise((resolve, reject) => {
+      google.script.run
+        .withSuccessHandler(data => resolve(data))
+        .withFailureHandler(error => reject(error))
+        .postToServer(targetName, postString);
+    });
   }
 
   function getRecords(sheetName) {

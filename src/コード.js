@@ -94,7 +94,7 @@ function fuelData(postData) {
         }
     }
     catch (error) {
-        return "データの追加中にエラーが発生しました。";
+        return "データの登録中にエラーが発生しました。";
     }
 }
 function medicineData(postData) {
@@ -105,16 +105,16 @@ function medicineData(postData) {
         const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳");
         let updateRow = 0;
         const recordNumber = (_b = postData.recordNumber) !== null && _b !== void 0 ? _b : 0;
+        const lastRow = sheet.getLastRow();
         if (recordNumber == 0) {
             // 最終行を下にコピー
-            let lastRow = sheet.getLastRow();
             const srcRange = sheet.getRange(lastRow, 1, 1, 100);
             const dstRange = sheet.getRange(lastRow + 1, 1);
             srcRange.copyTo(dstRange);
             updateRow = lastRow + 1;
         }
         else {
-            const data = sheet.getRange("A2:A999").getValues(); // A列のすべての値を取得
+            const data = sheet.getRange("A2:A" + lastRow).getValues(); // A列のすべての値を取得
             for (let i = 0; i < data.length; i++) {
                 if (data[i][0] == recordNumber) {
                     updateRow = i + 2;
@@ -139,7 +139,7 @@ function medicineData(postData) {
         }
     }
     catch (error) {
-        return "データの追加中にエラーが発生しました。";
+        return "データの登録中にエラーが発生しました。";
     }
 }
 /**

@@ -116,11 +116,9 @@
           document.getElementById("lastDistanceLabel").textContent = "今回燃費";
           const f = record["今回燃費"];
           document.getElementById("lastDistance").value = f.toFixed(2);
-          if (record["限定給油"] == true) {
-            document.getElementById("notFullTank").checked = true;
-          } else {
-            document.getElementById("fullTank").checked = true;
-          }
+          const fullTank = (record["限定給油"] != true)
+          document.getElementById("notFullTank").checked = !fullTank;
+          document.getElementById("fullTank").checked = fullTank;
         } catch (error) {
           form.style.display = "none";
           statusBar.style.display = "none";
