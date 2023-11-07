@@ -84,7 +84,7 @@
 
         try {
           if (records.length === 0) {
-            records = await getRecords("お薬手帳");
+            records = JSON.parse(await googleScriptRun.getRecords("お薬手帳"));
           }
           updateRecordInfo(records, currentRecord,
             ["recordNumber", "date", "medicine", "quantity", "symptom", "memo"],

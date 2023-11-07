@@ -8,6 +8,17 @@
     }
   })
 
+  const googleScriptRun = new Proxy({}, {
+    get(target, prop) {
+      return (...args) => new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+        [prop](...args);
+      });
+    }
+  });
+
   function serializeFormToJson(form) {
     const formData = new FormData(form);
     const jsonData = {};
@@ -37,7 +48,7 @@
     // console.log(postString);
 
     try {
-      const data = await postData(e.target.name, postString);
+      const data = await googleScriptRun.postToServer(e.target.name, postString);
       resultDiv.innerHTML = data;
     } catch (error) {
       resultDiv.innerHTML = "エラーが発生しました: " + error;
@@ -53,23 +64,23 @@
     }
   }
 
-  function postData(targetName, postString) {
-    return new Promise((resolve, reject) => {
-      google.script.run
-        .withSuccessHandler(data => resolve(data))
-        .withFailureHandler(error => reject(error))
-        .postToServer(targetName, postString);
-    });
-  }
+  // function postData(targetName, postString) {
+  //   return new Promise((resolve, reject) => {
+  //     google.script.run
+  //       .withSuccessHandler(data => resolve(data))
+  //       .withFailureHandler(error => reject(error))
+  //       .postToServer(targetName, postString);
+  //   });
+  // }
 
-  function getRecords(sheetName) {
-    return new Promise((resolve, reject) => {
-      google.script.run
-        .withSuccessHandler(data => resolve(JSON.parse(data)))
-        .withFailureHandler(error => reject(error))
-        .getRecords(sheetName);
-    });
-  }
+  // function getRecords(sheetName) {
+  //   return new Promise((resolve, reject) => {
+  //     google.script.run
+  //       .withSuccessHandler(data => resolve(JSON.parse(data)))
+  //       .withFailureHandler(error => reject(error))
+  //       .getRecords(sheetName);
+  //   });
+  // }
 
   function updateRecordInfo(records, currentRecord, inputArray, receiveArray) {
     // 列の見出しを取得

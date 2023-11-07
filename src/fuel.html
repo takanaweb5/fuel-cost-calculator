@@ -105,7 +105,7 @@
 
         try {
           if (records.length === 0) {
-            records = await getRecords("燃費管理");
+            records = JSON.parse(await googleScriptRun.getRecords("燃費管理"));
           }
           const record = updateRecordInfo(records, currentRecord,
             ["recordNumber", "date", "distance", "thisDistance", "pricePerLiter", "fuelAmount", "totalPrice"],
