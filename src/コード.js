@@ -52,6 +52,8 @@ function postToServer(target, postString) {
             return fuelData(postData);
         case "medicine":
             return medicineData(postData);
+        case "memo":
+            return memoData(postData);
         default:
             return "";
     }
@@ -131,6 +133,48 @@ function medicineData(postData) {
         sheet.getRange("E" + updateRow).setValue(postData.quantity);
         sheet.getRange("F" + updateRow).setValue(postData.symptom);
         sheet.getRange("G" + updateRow).setValue(postData.memo);
+        if (recordNumber == 0) {
+            return `データを１件追加しました。`;
+        }
+        else {
+            return `データを１件更新しました。`;
+        }
+    }
+    catch (error) {
+        return "データの登録中にエラーが発生しました。";
+    }
+}
+function memoData(postData) {
+    var _a, _b;
+    try {
+        // スプレッドシートを開く
+        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+        const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("メモ");
+        let updateRow = 0;
+        const recordNumber = (_b = postData.recordNumber) !== null && _b !== void 0 ? _b : 0;
+        const lastRow = sheet.getLastRow();
+        if (recordNumber == 0) {
+            // 最終行を下にコピー
+            const srcRange = sheet.getRange(lastRow, 1, 1, 100);
+            const dstRange = sheet.getRange(lastRow + 1, 1);
+            srcRange.copyTo(dstRange);
+            updateRow = lastRow + 1;
+        }
+        else {
+            const data = sheet.getRange("A2:A" + lastRow).getValues(); // A列のすべての値を取得
+            for (let i = 0; i < data.length; i++) {
+                if (data[i][0] == recordNumber) {
+                    updateRow = i + 2;
+                    break;
+                }
+            }
+            if (updateRow == 0) {
+                return "データの更新に失敗しました";
+            }
+        }
+        sheet.getRange("B" + updateRow).setValue(new Date());
+        sheet.getRange("C" + updateRow).setValue(postData.date);
+        sheet.getRange("D" + updateRow).setValue(postData.memo);
         if (recordNumber == 0) {
             return `データを１件追加しました。`;
         }

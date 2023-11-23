@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+    <title>メモ</title>
+    <?!=include('css');?>
+    <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>メモ</h1>
+      <form id="form" name="memo">
+        <input id="recordNumber" name="recordNumber" hidden value="0">
+        <div class="input-group">
+          <label for="date">日付</label>
+          <input type="date" id="date" name="date" required inputmode="date">
+        </div>
+        <div class="input-group">
+          <label for="memo">メモ</label>
+          <textarea id="memo" name="memo" rows="10"></textarea>
+        </div>
+        <p style="height: 0.6em;"></p>
+        <button type="submit" id="post" name="post">登録</button>
+        <p style="height: 0.6em;"></p>
+      </form>
+      <div id="result" class="result">
+      </div>
+      <div class="status-bar" id="status-bar">
+        <button class="record-button" id="prev-record">◁</button>
+        <p class="record-info" id="record-info">
+          ---
+        </p>
+        <button class="record-button" id="next-record">▷</button>
+      </div>
+      <div id="result" class="result"></div>
+    </div>
+
+    <!-- ローディングスピナー -->
+    <div class="spinner-container">
+      <div id="loadingSpinner" class="loading-spinner"></div>
+    </div>
+    <script>
+      const prevRecordButton = document.getElementById('prev-record');
+      const nextRecordButton = document.getElementById('next-record');
+      const recordInfo = document.getElementById('record-info')
+      const resultDiv = document.getElementById("result");
+      const loadingSpinner = document.getElementById("loadingSpinner");
+      const statusBar = document.getElementById("status-bar");
+      const recordNumber = document.getElementById('recordNumber')
+      prevRecordButton.addEventListener('click', onRecordButtonClick);
+      nextRecordButton.addEventListener('click', onRecordButtonClick);
+
+      // 現在のレコードと総レコード数を仮定
+      let currentRecord = Number(<?= recordCount("メモ") ?>) + 1;
+      let totalRecords = Number(<?= recordCount("メモ") ?>);
+      prevRecordButton.disabled = false;
+      nextRecordButton.disabled = true;
+      let records = [];
+
+      async function onRecordButtonClick(event) {
+        if (event.target === prevRecordButton) {
+          currentRecord--;
+        } if (event.target === nextRecordButton) {
+          currentRecord++;
+        }
+        prevRecordButton.disabled = true;
+        nextRecordButton.disabled = true;
+        loadingSpinner.style.display = "block";
+
+        try {
+          if (records.length === 0) {
+            records = JSON.parse(await googleScriptRun.getRecords("メモ"));
+          }
+          updateRecordInfo(records, currentRecord,
+            ["recordNumber", "date", "memo"],
+            ["連番", "日付", "メモ"]);
+          document.getElementById("post").innerText = "更新";
+        } catch (error) {
+          form.style.display = "none";
+          statusBar.style.display = "none";
+          resultDiv.innerHTML = "エラーが発生しました: " + error;
+        } finally {
+          loadingSpinner.style.display = "none";
+          currentRecord = recordNumber.value;
+          prevRecordButton.disabled = (currentRecord <= 1);
+          nextRecordButton.disabled = (currentRecord >= totalRecords);
+          recordInfo.textContent = `${currentRecord}/${totalRecords}`;
+        }
+      }
+
+      window.onload = function () {
+        // 今日の日付を日付フィールドに設定
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("date").value = today;
+      }
+    </script>
+    <?!=include('js');?>
+  </body>
+</html>
