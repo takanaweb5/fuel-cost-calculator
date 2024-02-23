@@ -1,5 +1,19 @@
 let result = ""; //html内のテンプレート文字に展開させるためグローバルで宣言する
 
+interface Env {
+  [key: string]: any;
+}
+
+const env: Env = new Proxy(PropertiesService.getScriptProperties(), {
+  get(target, prop: string) {
+    return target.getProperty(prop);
+  },
+  // set(target, prop: string, value) {
+  //   target.setProperty(prop, value);
+  //   return true; // 必要に応じてbooleanを返す
+  // }
+});
+
 function doGet(e: GoogleAppsScript.Events.DoGet): any {
   Logger.log("doGet:" + JSON.stringify(e.parameter));
 
@@ -32,7 +46,8 @@ function thisUrl() {
 
 // データベースのレコード数を取得する
 function recordCount(SheetName: string): number {
-  const sheetId: string = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+  // const sheetId: string = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+  const sheetId = env.DATA_SHEET;
   const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(SheetName) as GoogleAppsScript.Spreadsheet.Sheet;
   const lastRow = sheet.getLastRow();
   return sheet.getRange("A" + lastRow).getValue();
@@ -41,8 +56,7 @@ function recordCount(SheetName: string): number {
 // 前回の総走行距離を返す
 function lastDistance() {
   // スプレッドシートを開く
-  const sheetId =
-    PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+  const sheetId = env.DATA_SHEET;
   const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理") as GoogleAppsScript.Spreadsheet.Sheet;
   const lastRow = sheet.getLastRow();
   return sheet.getRange("D" + lastRow).getValue();
@@ -67,7 +81,7 @@ function postToServer(target: string, postString: string): string {
 
 //　レコード番号,シート名を引数にしてレコード情報をjsonで返す
 function getRecords(sheetName: string): string {
-  const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+  const sheetId = env.DATA_SHEET;
   const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName) as GoogleAppsScript.Spreadsheet.Sheet;
   const data = sheet.getDataRange().getValues();
   return JSON.stringify(data);
@@ -76,7 +90,7 @@ function getRecords(sheetName: string): string {
 function fuelData(postData: any): string {
   try {
     // スプレッドシートを開く
-    const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+    const sheetId = env.DATA_SHEET;
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理") as GoogleAppsScript.Spreadsheet.Sheet;
 
     // 最終行を下にコピー
@@ -108,7 +122,7 @@ function fuelData(postData: any): string {
 function medicineData(postData: any): string {
   try {
     // スプレッドシートを開く
-    const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+    const sheetId = env.DATA_SHEET;
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳") as GoogleAppsScript.Spreadsheet.Sheet;
     let updateRow = 0;
     const recordNumber: number = postData.recordNumber ?? 0;
@@ -150,7 +164,7 @@ function medicineData(postData: any): string {
 function memoData(postData: any): string {
   try {
     // スプレッドシートを開く
-    const sheetId = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+    const sheetId = env.DATA_SHEET;
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("メモ") as GoogleAppsScript.Spreadsheet.Sheet;
     let updateRow = 0;
     const recordNumber: number = postData.recordNumber ?? 0;

@@ -8,13 +8,13 @@
     }
   })
 
-  const googleScriptRun = new Proxy({}, {
-    get(target, prop) {
+  const googleScriptRun = new Proxy(google.script.run, {
+    get(target, method) {
       return (...args) => new Promise((resolve, reject) => {
-        google.script.run
+        target
           .withSuccessHandler(resolve)
           .withFailureHandler(reject)
-        [prop](...args);
+          [method](...args);
       });
     }
   });

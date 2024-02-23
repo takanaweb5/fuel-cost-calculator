@@ -1,5 +1,14 @@
 "use strict";
 let result = ""; //html内のテンプレート文字に展開させるためグローバルで宣言する
+const env = new Proxy(PropertiesService.getScriptProperties(), {
+    get(target, prop) {
+        return target.getProperty(prop);
+    },
+    // set(target, prop: string, value) {
+    //   target.setProperty(prop, value);
+    //   return true; // 必要に応じてbooleanを返す
+    // }
+});
 function doGet(e) {
     Logger.log("doGet:" + JSON.stringify(e.parameter));
     // LINKで開かれたページを返す(?page=html名 のパラメータで指定させる)
@@ -28,17 +37,16 @@ function thisUrl() {
 }
 // データベースのレコード数を取得する
 function recordCount(SheetName) {
-    var _a;
-    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+    // const sheetId: string = PropertiesService.getScriptProperties().getProperty("DATA_SHEET") ?? "";
+    const sheetId = env.DATA_SHEET;
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(SheetName);
     const lastRow = sheet.getLastRow();
     return sheet.getRange("A" + lastRow).getValue();
 }
 // 前回の総走行距離を返す
 function lastDistance() {
-    var _a;
     // スプレッドシートを開く
-    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+    const sheetId = env.DATA_SHEET;
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
     const lastRow = sheet.getLastRow();
     return sheet.getRange("D" + lastRow).getValue();
@@ -60,17 +68,15 @@ function postToServer(target, postString) {
 }
 //　レコード番号,シート名を引数にしてレコード情報をjsonで返す
 function getRecords(sheetName) {
-    var _a;
-    const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+    const sheetId = env.DATA_SHEET;
     const sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName);
     const data = sheet.getDataRange().getValues();
     return JSON.stringify(data);
 }
 function fuelData(postData) {
-    var _a;
     try {
         // スプレッドシートを開く
-        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+        const sheetId = env.DATA_SHEET;
         const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("燃費管理");
         // 最終行を下にコピー
         let lastRow = sheet.getLastRow();
@@ -100,13 +106,13 @@ function fuelData(postData) {
     }
 }
 function medicineData(postData) {
-    var _a, _b;
+    var _a;
     try {
         // スプレッドシートを開く
-        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+        const sheetId = env.DATA_SHEET;
         const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("お薬手帳");
         let updateRow = 0;
-        const recordNumber = (_b = postData.recordNumber) !== null && _b !== void 0 ? _b : 0;
+        const recordNumber = (_a = postData.recordNumber) !== null && _a !== void 0 ? _a : 0;
         const lastRow = sheet.getLastRow();
         if (recordNumber == 0) {
             // 最終行を下にコピー
@@ -145,13 +151,13 @@ function medicineData(postData) {
     }
 }
 function memoData(postData) {
-    var _a, _b;
+    var _a;
     try {
         // スプレッドシートを開く
-        const sheetId = (_a = PropertiesService.getScriptProperties().getProperty("DATA_SHEET")) !== null && _a !== void 0 ? _a : "";
+        const sheetId = env.DATA_SHEET;
         const sheet = SpreadsheetApp.openById(sheetId).getSheetByName("メモ");
         let updateRow = 0;
-        const recordNumber = (_b = postData.recordNumber) !== null && _b !== void 0 ? _b : 0;
+        const recordNumber = (_a = postData.recordNumber) !== null && _a !== void 0 ? _a : 0;
         const lastRow = sheet.getLastRow();
         if (recordNumber == 0) {
             // 最終行を下にコピー
