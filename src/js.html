@@ -14,7 +14,7 @@
         target
           .withSuccessHandler(resolve)
           .withFailureHandler(reject)
-          [method](...args);
+        [method](...args);
       });
     }
   });
@@ -87,7 +87,6 @@
     const headerRow = records[0];
     const recordData = [];
     for (let i = 1; i < records.length; i++) {
-      console.log(i + ":" + records[i][0]);
       // 連番が一致する行を見つけた場合
       if (records[i][0] === currentRecord) {
         for (let j = 0; j < headerRow.length; j++) {
@@ -107,8 +106,10 @@
       if (inputElement.type === 'date') {
         const data = record[receiveArray[i]];
         console.log(data);
-        console.log(inputElement.name);
-        inputElement.value = data.split("T")[0];
+        // 日本時間に変換しないと1日ずれる
+        const japanDate = new Date(data).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' })
+        console.log(japanDate);
+        inputElement.value = japanDate.replace(/\//g, '-');
       } else {
         inputElement.value = record[receiveArray[i]];
       }
